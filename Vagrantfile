@@ -43,4 +43,7 @@ config.vm.define "host1" do |host1|
       vb.cpus = "2"
     end
     end
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbook.yml"
+    end
 end
