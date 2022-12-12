@@ -1,10 +1,10 @@
 ---
-- name: Install Foreman on host1 with role
+- name: Prepare for nstall Foreman on host2 with role
   become: True
   gather_facts: True
   hosts: host2
   tasks:
-    - name: Update Linux
+    - name: Update Linux packages
       yum:
         name: '*'
         state:  latest
@@ -14,29 +14,12 @@
         name: firewalld
         state: stopped
 
-    # - name: Add Puppet repository
-    #   shell: yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
-    
-    # - name: Enable EL Repo
-    #   shell: yum-config-manager --enable extras
-    
-    # - name: Install Repo
-    #   shell: yum -y install epel-release centos-release-scl-rh
-
-    # - name: Add repo Foreman
-    #   shell: yum -y install https://yum.theforeman.org/releases/3.1/el7/x86_64/foreman-release.rpm
-
-    # - name: Install Foreman
-    #   yum:
-    #     name: foreman-installer
-    #     state: latest
-
     - name: Template /etc/hosts
       template:
         src:  templates/hosts.j2
         dest: /etc/hosts
 
-- name: Foreman
+- name: Install Foreman  
   become: True
   gather_facts: False
   hosts: host2
@@ -45,11 +28,6 @@
     - theforeman.operations.puppet_repositories
     - theforeman.operations.foreman_repositories
     - theforeman.operations.installer
-
-    # - name: Template /etc/resolv.conf
-    #   template:
-    #     src: templates/resolv.conf.j2
-    #     dest: /etc/resolv.conf
 
 - name: Install FreeIPA client on host2 and add in domain test.local
   become: True
