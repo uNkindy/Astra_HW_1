@@ -37,7 +37,7 @@ ___
 
 2. __host2:__
 - Обновляются все пакеты linux для последующей установки Foreman;
-- Тимплейтом прокидывается на host2 настройки [hosts](https://github.com/uNkindy/Astra_HW_1/blob/main/templates/hosts.j2);
+- Копируются настройки файла [hosts](https://github.com/uNkindy/Astra_HW_1/blob/main/templates/hosts.j2) (templates);
 - Производится установка Foreman из коллекции официальных ролей [Foreman Operation Collection](https://galaxy.ansible.com/theforeman/operations);
 - Устанавливается FreeIpa client, регистрирующий ВМ host2 в домене test.local;
 

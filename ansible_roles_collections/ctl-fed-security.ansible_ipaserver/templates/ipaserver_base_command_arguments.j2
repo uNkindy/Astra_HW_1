@@ -1,0 +1,9 @@
+--realm {{ ipaserver_realm }}
+--domain {{ ipaserver_domain }}
+-a {{ ipaserver_admin_password }}
+-p {{ ipaserver_dir_admin_password }}
+--hostname={{ ipaserver_hostname }}
+--ip-address=192.168.56.240
+--setup-dns
+--no-forwarders
+--no-reverse

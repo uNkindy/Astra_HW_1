@@ -1,0 +1,31 @@
+ipaserver_base_command: ipa-server-install -U
+ipaserver_base_command_arguments: "{{ lookup('template', 'ipaserver_base_command_arguments.j2') }}"
+ipaserver_configure_ssh: True
+ipaserver_configure_sshd: True
+ipaserver_dns_forwarders: False
+ipaserver_domain: test.local
+ipaserver_hbac_allow: True
+ipaserver_hostname: "{{ ansible_fqdn }}"
+ipaserver_ip_address: "{{ ansible_eth1.ipv4.address }}"
+ipaserver_idstart: 5000
+ipaserver_idmax: False
+ipaserver_mkhomedir: True
+ipaserver_packages:
+  - ipa-server
+#  - bind
+#  - bind-dyndb-ldap
+  - ipa-server-dns
+ipaserver_realm: TEST.LOCAL
+ipaserver_setup_dns: True
+ipaserver_setup_ntp: True
+ipaserver_ssh_trust_dns: True
+ipaserver_ui_redirect: True
+ipaserver_manage_firewalld: False
+
+ipaserver_firewalld_rulesets:
+  - https
+  - ldaps
+  - kerberos
+  - kpasswd
+  - dns
+  - ntp
