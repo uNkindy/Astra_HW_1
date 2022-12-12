@@ -36,7 +36,7 @@ config.vm.define "host1" do |host1|
 
     host3.vm.host_name = 'host3'
     host3.vm.network "private_network", ip: "192.168.56.242"
-    host3.vm.network "forwarded_port", guest: 80, host: 8083
+    host3.vm.network "forwarded_port", guest: 80, host: 8082
   
     host3.vm.provider "virtualbox" do |vb|
       vb.memory = "2048"
