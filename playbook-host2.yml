@@ -1,0 +1,73 @@
+---
+- name: Install Foreman on host1 with role
+  become: True
+  gather_facts: True
+  hosts: host2
+  tasks:
+    - name: Update Linux
+      yum:
+        name: '*'
+        state:  latest
+
+    - name: Firewalld off
+      service:
+        name: firewalld
+        state: stopped
+
+    # - name: Add Puppet repository
+    #   shell: yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
+    
+    # - name: Enable EL Repo
+    #   shell: yum-config-manager --enable extras
+    
+    # - name: Install Repo
+    #   shell: yum -y install epel-release centos-release-scl-rh
+
+    # - name: Add repo Foreman
+    #   shell: yum -y install https://yum.theforeman.org/releases/3.1/el7/x86_64/foreman-release.rpm
+
+    # - name: Install Foreman
+    #   yum:
+    #     name: foreman-installer
+    #     state: latest
+
+    - name: Template /etc/hosts
+      template:
+        src:  templates/hosts.j2
+        dest: /etc/hosts
+
+- name: Foreman
+  become: True
+  gather_facts: False
+  hosts: host2
+  roles:
+    - theforeman.operations.ansible_repositories
+    - theforeman.operations.puppet_repositories
+    - theforeman.operations.foreman_repositories
+    - theforeman.operations.installer
+
+    # - name: Template /etc/resolv.conf
+    #   template:
+    #     src: templates/resolv.conf.j2
+    #     dest: /etc/resolv.conf
+
+- name: Install FreeIPA client on host2 and add in domain test.local
+  become: True
+  gather_facts: True
+  hosts: host2
+  vars:
+   freeipaclient_servers:
+     - host1.test.local
+   freeipaclient_domain: host2.test.local
+   freeipaclient_enroll_user: admin
+   freeipaclient_enroll_pass: 12345678
+   freeipaclient_dns_server: 192.168.56.240
+
+  roles:
+   - ctl-fed-security.freeipa-client
+  tags:
+   - freeipa
+
+
+      # name: Add route 
+      # shell: ip route add default via 192.168.56.1 dev eth1

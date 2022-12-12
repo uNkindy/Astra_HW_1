@@ -1,0 +1,77 @@
+---
+- name: Install FreeIPA on host1 with role
+  become: True
+  gather_facts: False
+  hosts: host1
+  tasks:
+    - name: Add hosts in /etc/hosts
+      shell: echo "192.168.56.240  host1.test.local host1" >> /etc/hosts && echo "192.168.56.241  host2.test.local" >> /etc/hosts
+
+    - name: Update nss
+      yum:
+        name: nss
+        state:  latest
+
+- name: Install FreeIPA on host1 with role
+  become: True
+  gather_facts: True
+  hosts: host1      
+
+  vars:
+    ipaserver_admin_password: "12345678"
+    ipaserver_dir_admin_password: "12345678"
+  
+  roles:
+    - ctl-fed-security.ansible_ipaserver
+
+- name: Add two users
+  become: True
+  gather_facts: False
+  hosts: host1
+  tasks:
+    - name: Add user1 to FreeIPA
+      community.general.ipa_user:
+        name: user1
+        givenname: user1
+        sn: user1
+        state: present
+        uidnumber: '1001'
+        gidnumber: '100'
+        homedirectory: /home/user1
+        ipa_host: host1.test.local
+        ipa_user: admin
+        ipa_pass: 12345678
+
+    - name: Add user2 to FreeIPA
+      community.general.ipa_user:
+        name: user2
+        givenname: user2
+        sn: user2
+        state: present
+        uidnumber: '1002'
+        gidnumber: '101'
+        homedirectory: /home/user2
+        ipa_host: host1.test.local
+        ipa_user: admin
+        ipa_pass: 12345678
+
+    - name: Install DNS
+      shell: ipa-dns-install --ip-address=192.168.56.240 --no-forwarders --no-reverse
+
+
+    - name: Add DNS server in /etc/resolve
+      template:
+        src:  templates/resolv.conf.j2 
+        dest: /etc/resolv.conf
+
+    - name: Off firewalld
+      systemd:
+        name: firewalld
+        state: stopped
+
+    - name: Add route for host
+      shell: ip route add default via 192.168.56.1 dev eth1
+    
+
+
+      
