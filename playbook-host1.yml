@@ -4,8 +4,8 @@
   gather_facts: False
   hosts: host1
   tasks:
-    - name: Add hosts in /etc/hosts
-      shell: echo "192.168.56.240  host1.test.local host1" >> /etc/hosts && echo "192.168.56.241  host2.test.local" >> /etc/hosts
+    # - name: Add hosts in /etc/hosts
+    #   shell: echo "192.168.56.240  host1.test.local host1" >> /etc/hosts && echo "192.168.56.241  host2.test.local" >> /etc/hosts
 
     - name: Update nss
       yum:
@@ -55,14 +55,14 @@
         ipa_user: admin
         ipa_pass: 12345678
 
-    - name: Install DNS
-      shell: ipa-dns-install --ip-address=192.168.56.240 --no-forwarders --no-reverse
+    # - name: Install DNS
+    #   shell: ipa-dns-install --ip-address=192.168.56.240 --no-forwarders --no-reverse
 
 
-    - name: Add DNS server in /etc/resolve
-      template:
-        src:  templates/resolv.conf.j2 
-        dest: /etc/resolv.conf
+    # - name: Add DNS server in /etc/resolve
+    #   template:
+    #     src:  templates/resolv.conf.j2 
+    #     dest: /etc/resolv.conf
 
     - name: Off firewalld
       systemd:
