@@ -77,4 +77,4 @@ ___
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <meta name="Author" content="Zabbix SIA" />
 ```
-- В папке ansible_roles_collections хранятся исползуемые роли для установки программных продуктов.
+- В папке ansible_roles_collections хранятся испольЫзуемые роли для установки программных продуктов.
