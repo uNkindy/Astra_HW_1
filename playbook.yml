@@ -1,0 +1,141 @@
+---
+- name: Update nss on host1
+  become: True
+  gather_facts: False
+  hosts: host1
+  tasks:
+    - name: Update nss
+      yum:
+        name: nss
+        state:  latest
+
+- name: Install FreeIPA on host1 with role
+  become: True
+  gather_facts: True
+  hosts: host1      
+
+  vars:
+    ipaserver_admin_password: "12345678"
+    ipaserver_dir_admin_password: "12345678"
+  
+  roles:
+    - ctl-fed-security.ansible_ipaserver
+
+- name: Add two users in FreeIpa server and turn off firewalld
+  become: True
+  gather_facts: False
+  hosts: host1
+  tasks:
+    - name: Add user1 to FreeIPA
+      community.general.ipa_user:
+        name: user1
+        givenname: user1
+        sn: user1
+        state: present
+        uidnumber: '1001'
+        gidnumber: '100'
+        homedirectory: /home/user1
+        ipa_host: host1.test.local
+        ipa_user: admin
+        ipa_pass: 12345678
+
+    - name: Add user2 to FreeIPA
+      community.general.ipa_user:
+        name: user2
+        givenname: user2
+        sn: user2
+        state: present
+        uidnumber: '1002'
+        gidnumber: '101'
+        homedirectory: /home/user2
+        ipa_host: host1.test.local
+        ipa_user: admin
+        ipa_pass: 12345678
+
+    - name: Off firewalld
+      systemd:
+        name: firewalld
+        state: stopped
+
+- name: Prepare for nstall Foreman on host2 with role
+  become: True
+  gather_facts: True
+  hosts: host2
+  tasks:
+    - name: Update Linux packages
+      yum:
+        name: '*'
+        state:  latest
+
+    - name: Firewalld off
+      service:
+        name: firewalld
+        state: stopped
+
+    - name: Template /etc/hosts
+      template:
+        src:  templates/hosts.j2
+        dest: /etc/hosts
+
+- name: Install Foreman  
+  become: True
+  gather_facts: False
+  hosts: host2
+  roles:
+    - theforeman.operations.ansible_repositories
+    - theforeman.operations.puppet_repositories
+    - theforeman.operations.foreman_repositories
+    - theforeman.operations.installer
+
+- name: Install FreeIPA client on host2 and add in domain test.local
+  become: True
+  gather_facts: True
+  hosts: host2
+  vars:
+   freeipaclient_servers:
+     - host1.test.local
+   freeipaclient_domain: host2.test.local
+   freeipaclient_enroll_user: admin
+   freeipaclient_enroll_pass: 12345678
+   freeipaclient_dns_server: 192.168.56.240
+
+  roles:
+   - ctl-fed-security.freeipa-client
+  tags:
+   - freeipa
+
+- name: Install Zabbix on host3
+  become: True
+  gather_facts: False
+  hosts: host3
+  tasks:
+    - name: Install yum utils
+      yum:
+        name: yum-utils
+        state: present
+      
+    - name: Add repository docker
+      shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install docker on host3
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: latest
+
+    - name: Docker process start
+      systemd:
+        name: docker
+        state: started
+
+    - name: Zabbix image start
+      shell: docker run --name some-zabbix-web-nginx-mysql -e DB_SERVER_HOST="some-mysql-server" -e MYSQL_USER="some-user" -e MYSQL_PASSWORD="some-password" -e ZBX_SERVER_HOST="some-zabbix-server" -e PHP_TZ="some-timezone" -d zabbix/zabbix-web-nginx-mysql:latest
+
+    - name: Zabbix image start
+      shell:  docker run --name some-zabbix-appliance -p 80:80 -p 10051:10051 -d zabbix/zabbix-appliance:latest
+      
+    - name: Add route for host
+      shell: ip route add default via 192.168.56.1 dev enp0s8
