@@ -57,7 +57,7 @@
         name: firewalld
         state: stopped
 
-- name: Prepare for nstall Foreman on host2 with role
+- name: Prepare for install Foreman on host2 with role
   become: True
   gather_facts: True
   hosts: host2
